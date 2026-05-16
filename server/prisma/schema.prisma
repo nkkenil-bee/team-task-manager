@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String
+  role      Role      @default(MEMBER)
+  projects  Project[] @relation("ProjectMembers")
+  tasks     Task[]    @relation("TaskAssignee")
+  managedProjects Project[] @relation("ProjectAdmin")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  adminId     String
+  admin       User     @relation("ProjectAdmin", fields: [adminId], references: [id])
+  members     User[]   @relation("ProjectMembers")
+  tasks       Task[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus @default(PENDING)
+  dueDate     DateTime
+  projectId   String
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assigneeId  String
+  assignee    User       @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
