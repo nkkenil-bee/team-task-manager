@@ -29,7 +29,7 @@ const ProjectDetails = () => {
     description: '',
     dueDate: '',
     assigneeId: '',
-    status: 'TODO'
+    status: 'PENDING'
   });
 
   const fetchProjectDetails = async () => {
@@ -64,7 +64,7 @@ const ProjectDetails = () => {
       await api.post('/tasks', { ...taskData, projectId: id });
       toast.success('Task created and assigned!');
       setShowTaskModal(false);
-      setTaskData({ title: '', description: '', dueDate: '', assigneeId: '', status: 'TODO' });
+      setTaskData({ title: '', description: '', dueDate: '', assigneeId: '', status: 'PENDING' });
       fetchProjectDetails();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create task');

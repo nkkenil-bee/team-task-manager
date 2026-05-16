@@ -1,0 +1,13 @@
+{
+  "name": "team-task-manager-root",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "build": "npm run build -w client && npm run prisma:generate -w server && npm run prisma:migrate:prod -w server",
+    "start": "npm start -w server"
+  }
+}
