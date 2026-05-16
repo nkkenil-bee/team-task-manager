@@ -1,11 +1,11 @@
 const prisma = require('../utils/prisma');
 
-const getStats = async (req, res, next) => {
+const getDashboardStats = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const role = req.user.role;
 
-    let totalTasks, completedTasks, pendingTasks, overdueTasks;
+    let totalTasks, completedTasks, inProgressTasks, overdueTasks;
     const today = new Date();
 
     if (role === 'ADMIN') {
@@ -17,7 +17,7 @@ const getStats = async (req, res, next) => {
 
       totalTasks = await prisma.task.count({ where: { projectId: { in: projectIds } } });
       completedTasks = await prisma.task.count({ where: { projectId: { in: projectIds }, status: 'COMPLETED' } });
-      pendingTasks = await prisma.task.count({ where: { projectId: { in: projectIds }, status: { in: ['PENDING', 'IN_PROGRESS'] } } });
+      inProgressTasks = await prisma.task.count({ where: { projectId: { in: projectIds }, status: { in: ['PENDING', 'IN_PROGRESS'] } } });
       overdueTasks = await prisma.task.count({
         where: {
           projectId: { in: projectIds },
@@ -28,7 +28,7 @@ const getStats = async (req, res, next) => {
     } else {
       totalTasks = await prisma.task.count({ where: { assigneeId: userId } });
       completedTasks = await prisma.task.count({ where: { assigneeId: userId, status: 'COMPLETED' } });
-      pendingTasks = await prisma.task.count({ where: { assigneeId: userId, status: { in: ['PENDING', 'IN_PROGRESS'] } } });
+      inProgressTasks = await prisma.task.count({ where: { assigneeId: userId, status: { in: ['PENDING', 'IN_PROGRESS'] } } });
       overdueTasks = await prisma.task.count({
         where: {
           assigneeId: userId,
@@ -39,10 +39,10 @@ const getStats = async (req, res, next) => {
     }
 
     res.json({
-      totalTasks,
-      completedTasks,
-      pendingTasks,
-      overdueTasks,
+      totalTasks: totalTasks || 0,
+      completedTasks: completedTasks || 0,
+      inProgressTasks: inProgressTasks || 0,
+      overdueTasks: overdueTasks || 0,
     });
   } catch (error) {
     next(error);
@@ -50,5 +50,5 @@ const getStats = async (req, res, next) => {
 };
 
 module.exports = {
-  getStats,
+  getDashboardStats,
 };

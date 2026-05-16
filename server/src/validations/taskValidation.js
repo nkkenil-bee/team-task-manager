@@ -14,7 +14,7 @@ const createTaskSchema = z.object({
 
 const updateTaskStatusSchema = z.object({
   body: z.object({
-    status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED']),
+    status: z.enum(['TODO', 'IN_PROGRESS', 'COMPLETED']),
   }),
 });
 

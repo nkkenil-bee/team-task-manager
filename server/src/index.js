@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const routes = require('./routes');
+const dashboardRoutes = require('./routes/dashboardRoutes'); // Direct import
 const errorMiddleware = require('./middleware/error');
 
 const app = express();
@@ -28,6 +29,8 @@ app.get("/health", (req, res) => {
 
 // Routes
 app.use('/api', routes);
+// Re-registering explicitly as requested by user to ensure dashboard is connected
+app.use('/api/dashboard', dashboardRoutes);
 
 // Error Handling
 app.use(errorMiddleware);

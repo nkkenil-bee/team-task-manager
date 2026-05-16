@@ -32,11 +32,13 @@ const getProjects = async (req, res, next) => {
       projects = await prisma.project.findMany({
         where: { adminId: userId },
         include: { _count: { select: { tasks: true, members: true } } },
+        orderBy: { createdAt: 'desc' },
       });
     } else {
       projects = await prisma.project.findMany({
         where: { members: { some: { id: userId } } },
         include: { _count: { select: { tasks: true, members: true } } },
+        orderBy: { createdAt: 'desc' },
       });
     }
 
@@ -53,7 +55,7 @@ const getProjectById = async (req, res, next) => {
       where: { id },
       include: {
         members: { select: { id: true, name: true, email: true, role: true } },
-        tasks: { include: { assignee: { select: { name: true } } } },
+        tasks: { include: { assignee: { select: { name: true } } }, orderBy: { createdAt: 'desc' } },
       },
     });
 
@@ -62,6 +64,38 @@ const getProjectById = async (req, res, next) => {
     }
 
     res.json(project);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateProject = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, description } = req.body;
+
+    const project = await prisma.project.update({
+      where: { id },
+      data: {
+        ...(name && { name }),
+        ...(description && { description }),
+      },
+    });
+
+    res.json(project);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteProject = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Prisma handles related tasks via onDelete: Cascade in the schema
+    await prisma.project.delete({ where: { id } });
+    
+    res.json({ message: 'Project deleted successfully' });
   } catch (error) {
     next(error);
   }
@@ -91,5 +125,7 @@ module.exports = {
   createProject,
   getProjects,
   getProjectById,
+  updateProject,
+  deleteProject,
   addMemberToProject,
 };

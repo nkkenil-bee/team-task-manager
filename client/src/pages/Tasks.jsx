@@ -10,11 +10,10 @@ const Tasks = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('ALL');
   const [search, setSearch] = useState('');
-  const { isAdmin } = useAuth();
 
   const fetchTasks = async () => {
     try {
-      const response = await api.get('/tasks');
+      const response = await api.get('tasks');
       setTasks(response.data);
     } catch (error) {
       toast.error('Failed to load tasks');
@@ -29,7 +28,7 @@ const Tasks = () => {
 
   const handleStatusChange = async (taskId, newStatus) => {
     try {
-      await api.patch(`/tasks/${taskId}/status`, { status: newStatus });
+      await api.patch(`tasks/${taskId}/status`, { status: newStatus });
       toast.success('Status updated');
       fetchTasks();
     } catch (error) {
@@ -52,9 +51,9 @@ const Tasks = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <CheckSquare className="w-6 h-6 text-indigo-600" />
-            My Tasks
+            All Tasks
           </h1>
-          <p className="text-gray-500">Manage and update your assigned tasks.</p>
+          <p className="text-gray-500">View and update task progress.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
@@ -65,7 +64,7 @@ const Tasks = () => {
               placeholder="Search tasks..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input-field pl-9 py-2 text-sm"
+              className="border rounded-lg pl-9 py-2 text-sm w-full outline-none focus:border-indigo-500"
             />
           </div>
           <div className="relative flex-1">
@@ -73,10 +72,10 @@ const Tasks = () => {
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="input-field pl-9 py-2 text-sm appearance-none"
+              className="border rounded-lg pl-9 py-2 text-sm w-full outline-none focus:border-indigo-500 appearance-none bg-white"
             >
               <option value="ALL">All Status</option>
-              <option value="PENDING">Pending</option>
+              <option value="PENDING">To Do</option>
               <option value="IN_PROGRESS">In Progress</option>
               <option value="COMPLETED">Completed</option>
             </select>
@@ -90,13 +89,12 @@ const Tasks = () => {
             key={task.id} 
             task={task} 
             onStatusChange={handleStatusChange}
-            isAdmin={isAdmin}
           />
         ))}
       </div>
 
       {filteredTasks.length === 0 && (
-        <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+        <div className="text-center py-20 bg-white rounded-xl border border-gray-100">
           <CheckSquare className="w-12 h-12 text-gray-200 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900">No tasks found</h3>
           <p className="text-gray-500">Adjust your filters or check back later.</p>

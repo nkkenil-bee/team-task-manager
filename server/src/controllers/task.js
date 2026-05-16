@@ -9,6 +9,7 @@ const createTask = async (req, res, next) => {
         title,
         description,
         dueDate: new Date(dueDate),
+        status: 'PENDING',
         projectId,
         assigneeId,
       },
@@ -29,11 +30,13 @@ const getTasks = async (req, res, next) => {
     if (role === 'ADMIN') {
       tasks = await prisma.task.findMany({
         include: { project: { select: { name: true } }, assignee: { select: { name: true } } },
+        orderBy: { createdAt: 'desc' },
       });
     } else {
       tasks = await prisma.task.findMany({
         where: { assigneeId: userId },
         include: { project: { select: { name: true } } },
+        orderBy: { createdAt: 'desc' },
       });
     }
 

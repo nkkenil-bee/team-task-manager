@@ -34,6 +34,14 @@ export const AuthProvider = ({ children }) => {
     return newUser;
   };
 
+  const updateUser = async (data) => {
+    const response = await api.put('/users/me', data);
+    const updatedUser = response.data;
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    return updatedUser;
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -45,6 +53,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     signup,
+    updateUser,
     logout,
     isAdmin: user?.role === 'ADMIN',
   };

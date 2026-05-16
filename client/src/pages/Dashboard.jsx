@@ -6,18 +6,17 @@ import {
   CheckCircle2, 
   Clock, 
   AlertCircle, 
-  ListTodo,
-  TrendingUp
+  ListTodo
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const StatCard = ({ title, value, icon: Icon, colorClass }) => (
-  <div className="card flex items-center gap-4">
-    <div className={`p-3 rounded-xl ${colorClass}`}>
+  <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
+    <div className={`p-3 rounded-lg ${colorClass}`}>
       <Icon className="w-6 h-6" />
     </div>
     <div>
-      <p className="text-sm text-gray-500 font-medium">{title}</p>
+      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{title}</p>
       <h3 className="text-2xl font-bold text-gray-900">{value}</h3>
     </div>
   </div>
@@ -31,7 +30,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await api.get('/dashboard/stats');
+        const response = await api.get('dashboard/stats');
         setStats(response.data);
       } catch (error) {
         toast.error('Failed to fetch dashboard stats');
@@ -55,61 +54,51 @@ const Dashboard = () => {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <LayoutDashboard className="w-6 h-6 text-indigo-600" />
-          Welcome back, {user.name}!
+          Welcome, {user.name}!
         </h1>
-        <p className="text-gray-500">Here's an overview of your team's productivity.</p>
+        <p className="text-gray-500">Here is your {user.role === 'ADMIN' ? 'team' : 'task'} overview.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           title="Total Tasks" 
           value={stats?.totalTasks || 0} 
           icon={ListTodo} 
-          colorClass="bg-indigo-100 text-indigo-600"
+          colorClass="bg-indigo-50 text-indigo-600"
         />
         <StatCard 
           title="Completed" 
           value={stats?.completedTasks || 0} 
           icon={CheckCircle2} 
-          colorClass="bg-green-100 text-green-600"
+          colorClass="bg-green-50 text-green-600"
         />
         <StatCard 
           title="In Progress" 
-          value={stats?.pendingTasks || 0} 
+          value={stats?.inProgressTasks || 0} 
           icon={Clock} 
-          colorClass="bg-blue-100 text-blue-600"
+          colorClass="bg-blue-50 text-blue-600"
         />
         <StatCard 
           title="Overdue" 
           value={stats?.overdueTasks || 0} 
           icon={AlertCircle} 
-          colorClass="bg-red-100 text-red-600"
+          colorClass="bg-red-50 text-red-600"
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="card">
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-indigo-600" />
-            Performance Overview
-          </h2>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 font-medium">Completion Rate</span>
-              <span className="text-sm font-bold">
-                {stats?.totalTasks > 0 
-                  ? Math.round((stats.completedTasks / stats.totalTasks) * 100) 
-                  : 0}%
-              </span>
-            </div>
-            <div className="w-full bg-gray-100 rounded-full h-2.5">
-              <div 
-                className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" 
-                style={{ width: `${stats?.totalTasks > 0 ? (stats.completedTasks / stats.totalTasks) * 100 : 0}%` }}
-              ></div>
-            </div>
-          </div>
+      <div className="mt-12 bg-white p-8 rounded-xl border border-gray-100 shadow-sm">
+        <h2 className="text-lg font-bold text-gray-900 mb-2">Project Progress</h2>
+        <div className="w-full bg-gray-100 rounded-full h-3 mt-4 overflow-hidden">
+          <div 
+            className="bg-indigo-600 h-full transition-all duration-1000" 
+            style={{ width: `${stats?.totalTasks > 0 ? (stats.completedTasks / stats.totalTasks) * 100 : 0}%` }}
+          ></div>
         </div>
+        <p className="text-sm text-gray-500 mt-2 font-medium">
+          {stats?.totalTasks > 0 
+            ? `${Math.round((stats.completedTasks / stats.totalTasks) * 100)}% of tasks completed` 
+            : 'No tasks to track yet'}
+        </p>
       </div>
     </div>
   );

@@ -10,7 +10,6 @@ import {
   Loader2, 
   ArrowLeft,
   UserPlus,
-  Calendar,
   X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -29,12 +28,13 @@ const ProjectDetails = () => {
     title: '',
     description: '',
     dueDate: '',
-    assigneeId: ''
+    assigneeId: '',
+    status: 'TODO'
   });
 
   const fetchProjectDetails = async () => {
     try {
-      const response = await api.get(`/projects/${id}`);
+      const response = await api.get(`projects/${id}`);
       setProject(response.data);
     } catch (error) {
       toast.error('Failed to load project details');
@@ -46,7 +46,7 @@ const ProjectDetails = () => {
   const fetchUsers = async () => {
     if (!isAdmin) return;
     try {
-      const response = await api.get('/users');
+      const response = await api.get('users');
       setAvailableUsers(response.data);
     } catch (error) {
       console.error('Failed to load users');
@@ -64,7 +64,7 @@ const ProjectDetails = () => {
       await api.post('/tasks', { ...taskData, projectId: id });
       toast.success('Task created and assigned!');
       setShowTaskModal(false);
-      setTaskData({ title: '', description: '', dueDate: '', assigneeId: '' });
+      setTaskData({ title: '', description: '', dueDate: '', assigneeId: '', status: 'TODO' });
       fetchProjectDetails();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create task');
@@ -97,7 +97,7 @@ const ProjectDetails = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Link to="/projects" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600 mb-6 transition-colors">
+      <Link to="/projects" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600 mb-6">
         <ArrowLeft className="w-4 h-4" /> Back to Projects
       </Link>
 
@@ -109,10 +109,10 @@ const ProjectDetails = () => {
         
         {isAdmin && (
           <div className="flex gap-4">
-            <button onClick={() => setShowMemberModal(true)} className="btn-secondary flex items-center gap-2">
+            <button onClick={() => setShowMemberModal(true)} className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2 font-medium">
               <UserPlus className="w-4 h-4" /> Add Member
             </button>
-            <button onClick={() => setShowTaskModal(true)} className="btn-primary flex items-center gap-2">
+            <button onClick={() => setShowTaskModal(true)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2 font-medium">
               <Plus className="w-4 h-4" /> Add Task
             </button>
           </div>
@@ -122,9 +122,9 @@ const ProjectDetails = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Members Sidebar */}
         <div className="lg:col-span-1">
-          <div className="card">
-            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Users className="w-4 h-4" /> Project Members
+          <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <Users className="w-4 h-4" /> Team Members
             </h3>
             <div className="space-y-3">
               {project.members?.map((member) => (
@@ -133,8 +133,8 @@ const ProjectDetails = () => {
                     {member.name.charAt(0)}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{member.name}</p>
-                    <p className="text-xs text-gray-500">{member.role}</p>
+                    <p className="text-sm font-bold text-gray-900">{member.name}</p>
+                    <p className="text-[10px] text-gray-500 uppercase font-bold">{member.role}</p>
                   </div>
                 </div>
               ))}
@@ -144,7 +144,7 @@ const ProjectDetails = () => {
 
         {/* Tasks List */}
         <div className="lg:col-span-3">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
             <ListTodo className="w-4 h-4" /> Project Tasks
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -153,7 +153,6 @@ const ProjectDetails = () => {
                 key={task.id} 
                 task={task} 
                 onStatusChange={handleStatusChange}
-                isAdmin={isAdmin}
               />
             ))}
             {project.tasks?.length === 0 && (
@@ -165,54 +164,55 @@ const ProjectDetails = () => {
         </div>
       </div>
 
-      {/* Add Task Modal */}
+      {/* Task Modal */}
       {showTaskModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-8 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">Create New Task</h2>
+              <h2 className="text-xl font-bold text-gray-900">Create New Task</h2>
               <button onClick={() => setShowTaskModal(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
             </div>
             <form onSubmit={handleCreateTask} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Task Title</label>
+                <label className="text-sm font-bold text-gray-700">Title</label>
                 <input
                   type="text"
                   required
                   value={taskData.title}
                   onChange={(e) => setTaskData({...taskData, title: e.target.value})}
-                  className="input-field"
-                  placeholder="e.g., Design homepage"
+                  className="w-full border rounded-lg px-3 py-2 outline-none focus:border-indigo-500"
+                  placeholder="Task title"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Description</label>
+                <label className="text-sm font-bold text-gray-700">Description</label>
                 <textarea
-                  rows="2"
+                  rows="3"
                   value={taskData.description}
                   onChange={(e) => setTaskData({...taskData, description: e.target.value})}
-                  className="input-field"
+                  className="w-full border rounded-lg px-3 py-2 outline-none focus:border-indigo-500"
+                  placeholder="Details..."
                 ></textarea>
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Due Date</label>
+                <label className="text-sm font-bold text-gray-700">Due Date</label>
                 <input
                   type="date"
                   required
                   value={taskData.dueDate}
                   onChange={(e) => setTaskData({...taskData, dueDate: e.target.value})}
-                  className="input-field"
+                  className="w-full border rounded-lg px-3 py-2 outline-none focus:border-indigo-500"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Assign To</label>
+                <label className="text-sm font-bold text-gray-700">Assign To</label>
                 <select
                   required
                   value={taskData.assigneeId}
                   onChange={(e) => setTaskData({...taskData, assigneeId: e.target.value})}
-                  className="input-field"
+                  className="w-full border rounded-lg px-3 py-2 outline-none focus:border-indigo-500 bg-white"
                 >
                   <option value="">Select Member</option>
                   {project.members?.map(m => (
@@ -220,7 +220,9 @@ const ProjectDetails = () => {
                   ))}
                 </select>
               </div>
-              <button type="submit" className="btn-primary w-full py-3">Create Task</button>
+              <button type="submit" className="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700">
+                Create & Assign Task
+              </button>
             </form>
           </div>
         </div>
@@ -228,10 +230,10 @@ const ProjectDetails = () => {
 
       {/* Add Member Modal */}
       {showMemberModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-8 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">Add Team Member</h2>
+              <h2 className="text-xl font-bold text-gray-900">Add Team Member</h2>
               <button onClick={() => setShowMemberModal(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
@@ -246,20 +248,20 @@ const ProjectDetails = () => {
                       {u.name.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-sm font-medium">{u.name}</p>
-                      <p className="text-xs text-gray-500">{u.email}</p>
+                      <p className="text-sm font-bold">{u.name}</p>
+                      <p className="text-[10px] text-gray-500 uppercase">{u.role}</p>
                     </div>
                   </div>
                   <button 
                     onClick={() => handleAddMember(u.id)}
-                    className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border"
                   >
-                    <UserPlus className="w-5 h-5" />
+                    <UserPlus className="w-4 h-4" />
                   </button>
                 </div>
               ))}
               {availableUsers.filter(u => !project.members.some(m => m.id === u.id)).length === 0 && (
-                <p className="text-center text-gray-500 py-4">No other members available.</p>
+                <p className="text-center text-gray-500 py-4 text-sm font-medium">No other members available.</p>
               )}
             </div>
           </div>

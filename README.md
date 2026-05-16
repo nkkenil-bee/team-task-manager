@@ -8,13 +8,17 @@ A comprehensive, production-ready Full-Stack Project Management application desi
 
 ### Authentication & Authorization
 - **Secure Auth**: JWT-based authentication with password hashing (Bcrypt).
+- **Profile Management**: Update personal details (Name, Email) and change password.
+- **Team Management**: View organizational members, change roles (Admin/Member), and remove users.
 - **Role-Based Access Control (RBAC)**: Distinct permissions for `ADMIN` and `MEMBER` roles.
 - **Protected Routes**: Secure navigation for authenticated users only.
 
 ### Admin Capabilities
-- **Project Management**: Create and manage high-level projects.
+- **Project Management**: Create, edit, and delete projects. Deletion automatically cleans up associated tasks.
 - **Team Management**: Add existing members to specific projects.
 - **Task Delegation**: Create, describe, and assign tasks to team members with due dates.
+- **Task Management**: Full edit capabilities for task title, description, due date, priority, and assignee.
+- **Task Deletion**: Secure removal of tasks with confirmation prompts.
 - **Global Overview**: Access to all project and task data.
 
 ### Member Capabilities
